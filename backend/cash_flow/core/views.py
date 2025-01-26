@@ -15,7 +15,10 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['get'])
     def subcategories(self, request, pk=None):
-        query = self.queryset.get(pk=pk).recordsubcategory_set.all()
+        try:
+            query = self.queryset.get(pk=pk).recordsubcategory_set.all()
+        except models.RecordCategory.DoesNotExist:
+            return response.Response(status=404)
         serializer = serializers.RecordSubCategorySerializer(query, many=True)
         return response.Response(serializer.data)
 
