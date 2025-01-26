@@ -1,5 +1,6 @@
 from rest_framework import viewsets, response
 from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny
 from . import models
 from . import serializers
 
@@ -7,6 +8,12 @@ from . import serializers
 class CashFlowRecordViewSet(viewsets.ModelViewSet):
     queryset = models.CashFlowRecord.objects.all()
     serializer_class = serializers.CashFlowRecordSerializer
+    permission_classes = [AllowAny]
+
+    def list(self, request):
+        queryset = self.queryset.all()
+        serializer = serializers.CashFlowRecordSlugsSerializer(queryset, many=True)
+        return response.Response(serializer.data)
 
 
 class CategoryViewSet(viewsets.ModelViewSet):

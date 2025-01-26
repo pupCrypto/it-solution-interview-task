@@ -2,6 +2,17 @@ from rest_framework import serializers
 from . import models
 
 
+class CashFlowRecordSlugsSerializer(serializers.ModelSerializer):
+    record_status = serializers.SlugRelatedField(slug_field='value', queryset=models.RecordStatus.objects.all())
+    record_type = serializers.SlugRelatedField(slug_field='value', queryset=models.RecordType.objects.all())
+    category = serializers.SlugRelatedField(slug_field='name', queryset=models.RecordCategory.objects.all())
+    subcategory = serializers.SlugRelatedField(slug_field='name', queryset=models.RecordSubCategory.objects.all())
+
+    class Meta:
+        model = models.CashFlowRecord
+        fields = '__all__'
+
+
 class CashFlowRecordSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.CashFlowRecord

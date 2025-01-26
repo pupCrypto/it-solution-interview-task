@@ -20,3 +20,18 @@ export function useFetchSubcategories(category) {
     const subcategories = useFetch(`/api/categories/${category}/subcategories/`);
     return subcategories ? subcategories : [];
 }
+
+export function useFetchStatuses() {
+    const statuses = useFetch('/api/statuses/');
+    return statuses ? statuses : [];
+}
+
+export function useFetchTypes() {
+    const types = useFetch('/api/types/');
+    return types ? types : [];
+}
+
+export function useFetchRecords() {
+    const records = useFetch('/api/cash-flow-records/');
+    return records ? records : [];
+}
