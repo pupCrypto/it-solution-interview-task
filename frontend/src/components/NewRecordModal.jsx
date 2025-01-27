@@ -34,7 +34,12 @@ export default function NewRecordModal({open, onClose, onOk}) {
 	const onInnerOk = () => {
 		form.validateFields()
 			.then(values => {
-				axios.post('/api/cash-flow-records/', values);
+				axios.post('/api/cash-flow-records/', values)
+					.then(() => {
+						messageApi.success({ content: 'Запись успешно создана' });
+						onOk(values);
+					})
+					.catch(() => messageApi.error({ content: 'Не удалось создать запись' }));
 			})
 			.catch(() => messageApi.error('Проверьте введенные данные'));
 		// onOk();

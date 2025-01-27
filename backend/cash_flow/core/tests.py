@@ -52,3 +52,27 @@ class TestHttpCore(TestMixin, TransactionTestCase):
         self.assertIn('Бизнес', statuses)
         self.assertIn('Личное', statuses)
         self.assertIn('Налог', statuses)
+
+    def test_get_total_number_of_records(self):
+        response = self.client.get('/api/cash-flow-records/total/')
+        self.assertEqual(response.status_code, 200)
+        json = response.json()
+        self.assertEqual(json['total'], 0)
+
+    def test_get_category_statistic(self):
+        self.fill_default()
+
+        first_category = models.RecordCategory.objects.first()
+        second_category = models.RecordCategory.objects.last()
+
+        self.create_cash_flow_record(100, category=first_category)
+        self.create_cash_flow_record(100, category=second_category)
+        self.create_cash_flow_record(100, category=first_category)
+        response = self.client.get('/api/statistics/categories/')
+        self.assertEqual(response.status_code, 200)
+        json = response.json()
+        for stat in json:
+            if stat['name'] == 'Инфраструктура':
+                self.assertEqual(stat['amount'], 200)
+            elif stat['name'] == 'Финансы':
+                self.assertEqual(stat['amount'], 100)

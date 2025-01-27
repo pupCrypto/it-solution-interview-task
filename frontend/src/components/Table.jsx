@@ -1,6 +1,6 @@
 import React from 'react';
 import { Table as AntdTable, ConfigProvider } from 'antd';
-import { useFetchRecords } from '../hooks/web';
+import { useFetchRecords, useFetchTotalNumberOfRecords } from '../hooks/web';
 
 function RenderDataBreakWord(text) {
     return (
@@ -19,7 +19,9 @@ function RenderData(text) {
 }
 
 export default function Table() {
-    const records = useFetchRecords();
+    const [page, setPage] = React.useState(1);
+    const total = useFetchTotalNumberOfRecords();
+    const records = useFetchRecords(page - 1);
     const columns = [
         {
             title: 'Дата',
@@ -66,7 +68,11 @@ export default function Table() {
     ];
     return (
         <ConfigProvider renderEmpty={() => <div>Нет записей</div>}>
-            <AntdTable dataSource={records} columns={columns} />
+            <AntdTable
+                dataSource={records}
+                columns={columns}
+                pagination={{ pageSize: 10, current: page, total: total?.total, onChange: setPage, position: ['bottomLeft'] }}
+            />
         </ConfigProvider>
     );
 }

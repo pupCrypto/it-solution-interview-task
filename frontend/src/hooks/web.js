@@ -11,13 +11,23 @@ function useFetch(url) {
     return data;
 }
 
+export function useFetchCategoriesStatistic() {
+    const categoriesStatistic = useFetch('/api/statistics/categories/');
+    return categoriesStatistic ? categoriesStatistic : [];
+}
+
+export function useFetchTotalNumberOfRecords() {
+    const totalNumberOfRecords = useFetch('/api/cash-flow-records/total/');
+    return totalNumberOfRecords ? totalNumberOfRecords : 0;
+}
+
 export function useFetchCategories() {
     const categories = useFetch('/api/categories/');
     return categories ? categories : [];
 }
 
 export function useFetchSubcategories(category) {
-    const subcategories = useFetch(`/api/categories/${category}/subcategories/`);
+    const subcategories = useFetch(`/api/categories/${category || -1}/subcategories/`);
     return subcategories ? subcategories : [];
 }
 
@@ -31,7 +41,7 @@ export function useFetchTypes() {
     return types ? types : [];
 }
 
-export function useFetchRecords() {
-    const records = useFetch('/api/cash-flow-records/');
+export function useFetchRecords(page=0) {
+    const records = useFetch(`/api/cash-flow-records/?page=${page}&limit=10`);
     return records ? records : [];
 }

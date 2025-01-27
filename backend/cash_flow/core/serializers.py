@@ -41,3 +41,9 @@ class RecordStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.RecordStatus
         fields = '__all__'
+
+
+class CategoriesStatisticSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    amount = serializers.FloatField()
+    name = serializers.CharField()
