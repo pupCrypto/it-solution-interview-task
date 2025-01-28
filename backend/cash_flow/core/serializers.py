@@ -31,6 +31,14 @@ class RecordSubCategorySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class CategoriesWithSubcategoriesSerializer(serializers.ModelSerializer):
+    subcategories = RecordSubCategorySerializer(many=True, read_only=True)
+
+    class Meta:
+        model = models.RecordCategory
+        fields = ('id', 'name', 'subcategories')
+
+
 class RecordTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.RecordType

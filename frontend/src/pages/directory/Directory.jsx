@@ -1,9 +1,10 @@
 import React from 'react';
-import { List, Flex, ConfigProvider, Button, Modal, Form, Input, Popconfirm } from 'antd';
-import { useFetchCategories, useFetchSubcategories, useFetchStatuses, useFetchTypes } from '../hooks/web';
-import { useAntdMessage } from '../hooks/antd';
+import { List, Flex, ConfigProvider, Button, Modal, Form, Input, Popconfirm, Tree } from 'antd';
+import { useFetchStatuses, useFetchTypes } from '../../hooks/web';
+import { useAntdMessage } from '../../hooks/antd';
 import { PlusCircleOutlined, DeleteOutlined, EditOutlined, SaveOutlined, CloseCircleOutlined } from '@ant-design/icons';
-import { axios } from '../share';
+import { axios } from '../../share';
+import CategoriesList from './DirectoryCategory';
 
 
 function SimpleListItem({item, onDelete, onSave}) {
@@ -207,21 +208,6 @@ function StatusesList() {
         </Form>
       </Modal>
     </>
-  );
-}
-
-function CategoriesList() {
-  return (
-    <List
-      header={(
-        <Flex justify='space-between'>
-          <b>Категория и подкатегория</b>
-          <Button size='small' type='primary' icon={<PlusCircleOutlined />} />
-        </Flex>
-      )}
-      bordered
-      style={{width: '100%', height: '300px'}}>
-    </List>
   );
 }
 

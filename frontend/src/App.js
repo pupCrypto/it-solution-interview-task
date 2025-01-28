@@ -1,9 +1,10 @@
 import { message } from 'antd';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
-import Directory from './pages/Directory';
+import Directory from './pages/directory/Directory';
 import Layout from './pages/Layout';
 import { AntdMessageContext } from './hooks/antd';
+import './App.css';
 
 function App() {
   const [messageApi, contextHolder] = message.useMessage();

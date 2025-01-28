@@ -6,7 +6,7 @@ export default function Layout() {
   return (
     <AntdLayout>
       <AntdLayout.Header style={{ height: '64px'}}>
-        <Menu theme='dark' mode='horizontal' defaultSelectedKeys={['1']}>
+        <Menu theme='dark' mode='horizontal' >
           <Menu.Item key='1'>
             <Link to='/'>Домашняя страница</Link>
           </Menu.Item>

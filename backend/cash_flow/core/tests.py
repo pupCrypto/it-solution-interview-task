@@ -76,3 +76,10 @@ class TestHttpCore(TestMixin, TransactionTestCase):
                 self.assertEqual(stat['amount'], 200)
             elif stat['name'] == 'Финансы':
                 self.assertEqual(stat['amount'], 100)
+
+    def test_get_categories_with_subcategories(self):
+        self.fill_default()
+        response = self.client.get('/api/categories/subcategory/')
+        self.assertEqual(response.status_code, 200)
+        json = response.json()
+        print(json)

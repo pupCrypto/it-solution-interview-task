@@ -22,6 +22,10 @@ class RecordType(models.Model):
 class RecordCategory(models.Model):
     name = models.CharField(max_length=124, unique=True)
 
+    @property
+    def subcategories(self):
+        return self.recordsubcategory_set.all()
+
 
 class RecordSubCategory(models.Model):
     name = models.CharField(max_length=124)

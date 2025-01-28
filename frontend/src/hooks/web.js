@@ -45,3 +45,8 @@ export function useFetchRecords(page=0) {
     const records = useFetch(`/api/cash-flow-records/?page=${page}&limit=10`);
     return records ? records : [];
 }
+
+export function useFetchCategoriesWithSubcategories() {
+    const categoriesWithSubcategories = useFetch('/api/categories/subcategory/');
+    return categoriesWithSubcategories ? categoriesWithSubcategories : [];
+}
