@@ -2,7 +2,7 @@ from rest_framework import viewsets, response, status
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from django.http import JsonResponse
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from . import models
 from . import serializers
 
@@ -21,21 +21,50 @@ class FilteredSubcategoryView(viewsets.ModelViewSet):
 class CashFlowRecordViewSet(viewsets.ModelViewSet):
     queryset = models.CashFlowRecord.objects.all()
     serializer_class = serializers.CashFlowRecordSerializer
+    response_serializer_class = serializers.CashFlowRecordSlugsSerializer
     permission_classes = [AllowAny]
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        response_serializer = self.response_serializer_class(serializer.instance)
+        # response_serializer.is_valid(raise_exception=True)
+        return response.Response(response_serializer.data, status=status.HTTP_201_CREATED)
+
     def list(self, request):
-        queryset = self.queryset.all()
+        queryset = self.queryset.all().filter(self.get_filter(request)).order_by('-id')
         page = int(request.GET.get('page', 0))
         limit = int(request.GET.get('limit', 10))
         offset = limit * page
         queryset = queryset[offset:offset + limit]
-        serializer = serializers.CashFlowRecordSlugsSerializer(queryset, many=True)
+        serializer = self.response_serializer_class(queryset, many=True)
         return response.Response(serializer.data)
 
     @action(detail=False, methods=['get'])
     def total(self, request):
-        total = len(self.queryset.all())
+        total = len(self.queryset.all().filter(self.get_filter(request)))
         return JsonResponse({'total': total})
+
+    def get_filter(self, request):
+        q = Q(id__gt=0)
+        if (statuses := request.GET.getlist('status')):
+            statuses = [int(status) for status in statuses]
+            q &= Q(record_status__in=statuses)
+        if (categories := request.GET.getlist('category')):
+            categories = [int(category) for category in categories]
+            q &= Q(category__in=categories)
+        if (types := request.GET.getlist('type')):
+            types = [int(type) for type in types]
+            q &= Q(record_type__in=types)
+        if (subcategories := request.GET.getlist('subcategory')):
+            subcategories = [int(subcategory) for subcategory in subcategories]
+            q &= Q(subcategory__in=subcategories)
+        if (date_from := request.GET.get('date_start')):
+            q &= Q(date__gte=date_from)
+        if (date_to := request.GET.get('date_end')):
+            q &= Q(date__lte=date_to)
+        return q
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -44,26 +73,17 @@ class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.RecordCategorySerializer
     permission_classes = [AllowAny]
 
-    @action(detail=True, methods=['get', 'post'])
-    def subcategories(self, request, pk=None):
-        if request.method == 'get':
-            try:
-                query = self.queryset.get(pk=pk).recordsubcategory_set.all()
-            except models.RecordCategory.DoesNotExist:
-                return response.Response(status=404)
-            serializer = serializers.RecordSubCategorySerializer(query, many=True)
-            return response.Response(serializer.data)
-        else:
-            serializer = serializers.RecordSubCategorySerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return response.Response(serializer.data, status=status.HTTP_201_CREATED)
-            return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
     @action(detail=False, methods=['get'])
-    def subcategory(self, request):  # noqa
+    def subcategories(self, request):  # noqa
         serializer = serializers.CategoriesWithSubcategoriesSerializer(self.model.objects.all(), many=True)
         return response.Response(serializer.data)
+
+
+class SubcategoriesViewSet(viewsets.ModelViewSet):
+    model = models.RecordSubCategory
+    queryset = model.objects.all()
+    serializer_class = serializers.RecordSubCategorySerializer
+    permission_classes = [AllowAny]
 
 
 class TypeViewSet(viewsets.ModelViewSet):

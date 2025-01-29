@@ -183,7 +183,7 @@ function StatusesList() {
         style={{width: '50%', height: '300px', overflow: 'auto'}}
         header={(
           <Flex justify='space-between'>
-            <b>Тип</b>
+            <b>Статус</b>
             <Button size='small' type='primary' icon={<PlusCircleOutlined />} onClick={() => setOpen(true)} />
           </Flex>
         )}

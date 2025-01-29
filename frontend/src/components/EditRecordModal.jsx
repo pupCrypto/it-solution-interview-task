@@ -6,13 +6,14 @@ import { axios } from '../share';
 
 const { TextArea } = Input;
 
-export default function NewRecordModal({open, onClose, onOk}) {
+export default function EditRecordModal({open, onClose, onSave, record}) {
 	const messageApi = useAntdMessage();
 	const [form] = Form.useForm();
 	const [category, setCategory] = React.useState(null);
 	const [subcategory, setSubcategory] = React.useState(null);
 	const [status, setStatus] = React.useState(null);
 	const [type, setType] = React.useState(null);
+	const [rrecord, setRecord] = React.useState(null);
 
 	const categories = useFetchCategories();
 	const subcategories = useFetchFilteredSubcategories(category);
@@ -34,11 +35,11 @@ export default function NewRecordModal({open, onClose, onOk}) {
 	const onInnerOk = () => {
 		form.validateFields()
 			.then(values => {
-				axios.post('/api/cash-flow-records/', values)
+				axios.put(`/api/cash-flow-records/${record?.id}/`, values)
 					.then((resp) => {
 						messageApi.success({ content: 'Запись успешно создана' });
 						form.resetFields();
-						onOk(resp.data);
+						onSave(resp.data);
 					})
 					.catch((e) => {
 						console.log(e);
@@ -46,20 +47,27 @@ export default function NewRecordModal({open, onClose, onOk}) {
 					});
 			})
 			.catch(() => messageApi.error('Проверьте введенные данные'));
-		// onOk();
 	}
 	const onInnerClose = () => {
 		form.resetFields();
 		setCategory(null);
 		onClose();
 	}
+	React.useEffect(() => {
+		if (record) {
+			setRecord(record);
+		} else {
+			form.resetFields();
+			console.log('reseting fields');
+		}
+	}, [record]);
 	return (
 		<Modal
-			title="Новая запись"
+			title="Редактирование"
 			open={open}
 			onCancel={onInnerClose}
 			footer={(
-				<Button type="primary" onClick={onInnerOk}>Создать</Button>
+				<Button type="primary" onClick={onInnerOk}>Сохранить</Button>
 			)}
 		>
 			<Form
@@ -70,37 +78,40 @@ export default function NewRecordModal({open, onClose, onOk}) {
 				wrapperCol={{
 					span: 14,
 				}}
+				initialValues={{
+					amount: rrecord?.amount,
+					record_status: rrecord?.record_status,
+					record_type: rrecord?.record_type,
+					category: rrecord?.category,
+					subcategory: rrecord?.subcategory,
+					comment: rrecord?.comment,
+				}}
 			>
 				<Form.Item label='Сумма' name='amount' rules={[{ required: true, message: '${label} обязательно для заполнения' }]}>
-					<InputNumber addonAfter='₽' min={0.01}/>
+					<InputNumber addonAfter='₽' min={0.01} />
 				</Form.Item>
 				<Form.Item label='Статус' name='record_status' rules={[{ required: true, message: '${label} обязательно для заполнения' }]}>
-					<Select onChange={onStatusChange} >
-						{statuses.map(status => (
-							<Select.Option key={status.id} value={status.id}>{status.value}</Select.Option>
-						))}
-					</Select>
+					<Select
+						onChange={onStatusChange}
+						options={statuses.map(item => ({ label: item.value, value: item.id }))}
+					/>
 				</Form.Item>
 				<Form.Item label='Тип' name='record_type' rules={[{ required: true, message: '${label} обязательно для заполнения' }]}>
-					<Select onChange={onTypeChange} >
-						{types.map(type => (
-							<Select.Option key={type.id} value={type.id}>{type.value}</Select.Option>
-						))}
-					</Select>
+					<Select
+						onChange={onTypeChange}
+						options={types.map(item => ({ label: item.value, value: item.id }))}
+					/>
 				</Form.Item>
 				<Form.Item label='Категория' name='category' rules={[{ required: true, message: '${label} обязательно для заполнения' }]}>
-					<Select onChange={onCategoryChange} >
-						{categories.map(category => (
-							<Select.Option key={category.id} value={category.id}>{category.name}</Select.Option>
-						))}
-					</Select>
+					<Select
+						onChange={onCategoryChange}
+						options={categories.map(item => ({ label: item.name, value: item.id }))}
+					/>
 				</Form.Item>
 				<Form.Item label='Подкатегория' name='subcategory' rules={[{ required: true, message: '${label} обязательно для заполнения' }]}>
-					<Select onChange={onSubcategoryChange} >
-						{subcategories.map(subcategory => (
-							<Select.Option key={subcategory.id} value={subcategory.id}>{subcategory.name}</Select.Option>
-						))}
-					</Select>
+					<Select onChange={onSubcategoryChange}
+						options={subcategories.map(item => ({ label: item.name, value: item.id }))}
+					/>
 				</Form.Item>
 				<Form.Item label='Комментарий' name='comment'>
 					<TextArea rows={2} maxLength={124} autoSize={{minRows: 2, maxRows: 3}} />

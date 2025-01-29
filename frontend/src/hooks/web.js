@@ -16,8 +16,8 @@ export function useFetchCategoriesStatistic() {
     return categoriesStatistic ? categoriesStatistic : [];
 }
 
-export function useFetchTotalNumberOfRecords() {
-    const totalNumberOfRecords = useFetch('/api/cash-flow-records/total/');
+export function useFetchTotalNumberOfRecords(filter) {
+    const totalNumberOfRecords = useFetch('/api/cash-flow-records/total/?' + filter);
     return totalNumberOfRecords ? totalNumberOfRecords : 0;
 }
 
@@ -26,7 +26,12 @@ export function useFetchCategories() {
     return categories ? categories : [];
 }
 
-export function useFetchSubcategories(category) {
+export function useFetchSubcategories() {
+    const subcategories = useFetch('/api/subcategories/');
+    return subcategories ? subcategories : [];
+}
+
+export function useFetchFilteredSubcategories(category) {
     const subcategories = useFetch(`/api/categories/${category || -1}/subcategories/`);
     return subcategories ? subcategories : [];
 }
@@ -41,12 +46,12 @@ export function useFetchTypes() {
     return types ? types : [];
 }
 
-export function useFetchRecords(page=0) {
-    const records = useFetch(`/api/cash-flow-records/?page=${page}&limit=10`);
+export function useFetchRecords(page=0, filter='') {
+    const records = useFetch(`/api/cash-flow-records/?page=${page}&limit=10&${filter}`);
     return records ? records : [];
 }
 
 export function useFetchCategoriesWithSubcategories() {
-    const categoriesWithSubcategories = useFetch('/api/categories/subcategory/');
+    const categoriesWithSubcategories = useFetch('/api/categories/subcategories/');
     return categoriesWithSubcategories ? categoriesWithSubcategories : [];
 }
