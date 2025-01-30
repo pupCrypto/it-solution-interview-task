@@ -78,7 +78,6 @@ export default function Table({
     const [open, setOpen] = React.useState(false);
     const [recordToEdit, setRecordToEdit] = React.useState(null);
     function onInnerEdit(record) {
-        console.log('edit', record.id);
         setOpen(true);
         setRecordToEdit(record);
     }
@@ -91,16 +90,13 @@ export default function Table({
             .catch((e) => messageApi.error({ content: 'Не удалось удалить запись' }));
     }
     function onSave(record) {
-        // TODO: save record
         setOpen(false);
         onEdit(record);
     }
     function onModalClose() {
-        console.log('close', recordToEdit.id);
         setOpen(false);
         setRecordToEdit(null);
     }
-    console.log('record to edit', recordToEdit);
     return (
         <ConfigProvider renderEmpty={() => <div>Нет записей</div>}>
             <AntdTable

@@ -3,6 +3,7 @@ import { Button, Modal, Form, Select, InputNumber, Input } from 'antd';
 import { useFetchCategories, useFetchFilteredSubcategories, useFetchStatuses, useFetchTypes } from '../hooks/web';
 import { useAntdMessage } from '../hooks/antd';
 import { axios } from '../share';
+import { filterObject } from '../misc';
 
 const { TextArea } = Input;
 
@@ -13,10 +14,11 @@ export default function EditRecordModal({open, onClose, onSave, record}) {
 	const [subcategory, setSubcategory] = React.useState(null);
 	const [status, setStatus] = React.useState(null);
 	const [type, setType] = React.useState(null);
-	const [rrecord, setRecord] = React.useState(null);
+	const [comment, setComment] = React.useState(null);
+	const [amount, setAmount] = React.useState(null);
 
 	const categories = useFetchCategories();
-	const subcategories = useFetchFilteredSubcategories(category);
+	const subcategories = useFetchFilteredSubcategories(category || categories.find(item => item.name === record?.category)?.id);
 	const statuses = useFetchStatuses();
 	const types = useFetchTypes();
 
@@ -35,15 +37,22 @@ export default function EditRecordModal({open, onClose, onSave, record}) {
 	const onInnerOk = () => {
 		form.validateFields()
 			.then(values => {
-				axios.put(`/api/cash-flow-records/${record?.id}/`, values)
+				const data = { amount, category, comment, record_status: status, record_type: type, subcategory };
+				const filtered = filterObject(data, (key, value) => value !== null);
+				axios.patch(`/api/cash-flow-records/${record?.id}/`, filtered)
 					.then((resp) => {
-						messageApi.success({ content: 'Запись успешно создана' });
+						messageApi.success({ content: 'Запись успешно обновлена' });
 						form.resetFields();
-						onSave(resp.data);
+						filtered.id = resp.data.id;
+						if (filtered.subcategory) filtered.subcategory = subcategories.find(item => item.id === filtered.subcategory)?.name;
+						if (filtered.category) filtered.category = categories.find(item => item.id === filtered.category)?.name;
+						if (filtered.record_type) filtered.record_type = types.find(item => item.id === filtered.record_type)?.value;
+						if (filtered.record_status) filtered.record_status = statuses.find(item => item.id === filtered.record_status)?.value;
+						onSave(filtered);
 					})
 					.catch((e) => {
 						console.log(e);
-						messageApi.error({ content: 'Не удалось создать запись' })
+						messageApi.error({ content: 'Не удалось обновить запись' })
 					});
 			})
 			.catch(() => messageApi.error('Проверьте введенные данные'));
@@ -54,13 +63,18 @@ export default function EditRecordModal({open, onClose, onSave, record}) {
 		onClose();
 	}
 	React.useEffect(() => {
-		if (record) {
-			setRecord(record);
-		} else {
-			form.resetFields();
-			console.log('reseting fields');
-		}
+		form.setFieldsValue({
+			amount: record?.amount,
+			record_status: record?.record_status,
+			record_type: record?.record_type,
+			category: record?.category,
+			subcategory: record?.subcategory,
+			comment: record?.comment,
+		});
 	}, [record]);
+	React.useEffect(() => {
+		form.setFieldsValue({ subcategory: null });
+	}, [category]);
 	return (
 		<Modal
 			title="Редактирование"
@@ -78,17 +92,9 @@ export default function EditRecordModal({open, onClose, onSave, record}) {
 				wrapperCol={{
 					span: 14,
 				}}
-				initialValues={{
-					amount: rrecord?.amount,
-					record_status: rrecord?.record_status,
-					record_type: rrecord?.record_type,
-					category: rrecord?.category,
-					subcategory: rrecord?.subcategory,
-					comment: rrecord?.comment,
-				}}
 			>
 				<Form.Item label='Сумма' name='amount' rules={[{ required: true, message: '${label} обязательно для заполнения' }]}>
-					<InputNumber addonAfter='₽' min={0.01} />
+					<InputNumber addonAfter='₽' min={0.01} onChange={(a) => setAmount(a)} />
 				</Form.Item>
 				<Form.Item label='Статус' name='record_status' rules={[{ required: true, message: '${label} обязательно для заполнения' }]}>
 					<Select
@@ -114,7 +120,7 @@ export default function EditRecordModal({open, onClose, onSave, record}) {
 					/>
 				</Form.Item>
 				<Form.Item label='Комментарий' name='comment'>
-					<TextArea rows={2} maxLength={124} autoSize={{minRows: 2, maxRows: 3}} />
+					<TextArea rows={2} maxLength={124} autoSize={{minRows: 2, maxRows: 3}} onChange={(e) => setComment(e.currentTarget.value)} />
 				</Form.Item>
 			</Form>
 		</Modal>

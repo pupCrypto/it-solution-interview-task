@@ -90,7 +90,10 @@ export default function Home() {
 		fetchRecords(page - 1, urlfyFilter(filter)).then(records => setRecords(records));
 	}
 	const onEdit = (record) => {
-		setRecords(records.map(item => item.id === record.id ? record : item));
+		if (Object.keys(record).includes('amount')) {
+			fetchCategoriesStatistic().then(res => setStatistic(res));
+		}
+		setRecords(records.map(item => item.id === record.id ? { ...item, ...record } : item));
 	}
 
 	React.useEffect(() => {
