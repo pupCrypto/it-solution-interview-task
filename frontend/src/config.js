@@ -1,10 +1,10 @@
 const config = {
-    API_HOST: 'localhost',
-    API_SECURE: false,
-    API_PORT: 8000,
+    REACT_APP_API_HOST: 'localhost',
+    REACT_APP_API_SECURE: false,
+    REACT_APP_API_PORT: 8000,
 
     get API_URL() {
-        return `${this.API_SECURE ? 'https' : 'http'}://${this.API_HOST}:${this.API_PORT}`;
+        return `${this.REACT_APP_API_SECURE ? 'https' : 'http'}://${this.REACT_APP_API_HOST}:${this.REACT_APP_API_PORT}`;
     }
 }
 
