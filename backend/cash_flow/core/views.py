@@ -8,6 +8,10 @@ from . import serializers
 
 
 class FilteredSubcategoryView(viewsets.ModelViewSet):
+    """
+    View for filtered subcategories
+    This view provide you possibility filter subcategories by url like '/api/categories/<category_id>/subcategories/'
+    """
     model = models.RecordSubCategory
     queryset = model.objects.all()
     serializer_class = serializers.RecordSubCategorySerializer
@@ -19,6 +23,10 @@ class FilteredSubcategoryView(viewsets.ModelViewSet):
 
 
 class CashFlowRecordViewSet(viewsets.ModelViewSet):
+    """
+    General view for cash flow records with one exception - it provides another serializer for response.
+    It done to avoid multiple requests from frontend for fetching names for categories and subcategories and so on.
+    """
     queryset = models.CashFlowRecord.objects.all()
     serializer_class = serializers.CashFlowRecordSerializer
     response_serializer_class = serializers.CashFlowRecordSlugsSerializer
@@ -74,7 +82,8 @@ class CategoryViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
 
     @action(detail=False, methods=['get'])
-    def subcategories(self, request):  # noqa
+    def subcategories(self, request):
+        """This action provides list of subcategories for selected category"""
         serializer = serializers.CategoriesWithSubcategoriesSerializer(self.model.objects.all(), many=True)
         return response.Response(serializer.data)
 
